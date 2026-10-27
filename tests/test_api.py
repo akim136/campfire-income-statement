@@ -195,3 +195,29 @@ def test_invalid_date_input_is_html_escaped(client):
     assert response.status_code == 422
     assert '<script>' not in response.text
     assert '&lt;script&gt;' in response.text
+
+
+def test_html_shows_statement_when_posted_income_and_expenses_cancel(client, ledger, monkeypatch):
+    ledger["journal_entries"] = [{
+        "id": "test-zero-net", "date": "2026-01-01", "status": "posted",
+        "memo": "Balanced synthetic example with zero net income",
+        "lines": [
+            {"account": "4000", "debit": "0.00", "credit": "1.00"},
+            {"account": "6000", "debit": "1.00", "credit": "0.00"},
+        ],
+    }]
+    monkeypatch.setattr(main, "LEDGER", ledger)
+    response = client.get("/")
+    assert response.status_code == 200
+    assert '<table' in response.text
+    assert "Net Income" in response.text
+    assert "$0.00" in response.text
+    assert "No activity in this period" not in response.text
+
+
+def test_html_defaults_do_not_leak_into_api_documentation(client):
+    paths = client.get("/openapi.json").json()["paths"]
+    assert "/" not in paths
+    assert "500" in paths["/income-statement"]["get"]["responses"]
+    response = client.get("/income-statement", params={"end": "2026-03-31"})
+    assert response.status_code == 422
