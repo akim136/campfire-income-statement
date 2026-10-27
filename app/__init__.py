@@ -1,0 +1,1 @@
+"""Campfire income statement application."""
