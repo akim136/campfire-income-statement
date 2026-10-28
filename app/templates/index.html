@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Income Statement · {{ company }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/statement.css') }}">
+</head>
+<body>
+  <main class="is">
+    <header class="is-header">
+      <h1>Income Statement</h1>
+      <p>{{ company }}</p>
+    </header>
+
+    <form class="is-form" method="get" action="{{ url_for('index') }}">
+      <div class="is-fields">
+        <label for="start">
+          <span class="is-meta">Start date</span>
+          <input id="start" name="start" type="date" value="{{ start }}" required
+                 aria-invalid="{{ 'true' if 'start' in invalid_fields else 'false' }}"
+                 {% if 'start' in invalid_fields %}aria-describedby="date-error"{% endif %}>
+        </label>
+        <label for="end">
+          <span class="is-meta">End date</span>
+          <input id="end" name="end" type="date" value="{{ end }}" required
+                 aria-invalid="{{ 'true' if 'end' in invalid_fields else 'false' }}"
+                 {% if 'end' in invalid_fields %}aria-describedby="date-error"{% endif %}>
+        </label>
+        <button type="submit">Apply Dates</button>
+      </div>
+      {% if error %}<p id="date-error" role="alert" class="is-error">{{ error }}</p>{% endif %}
+    </form>
+
+    {% if report %}
+    <section class="is-statement" aria-labelledby="period">
+      <div class="is-period">
+        <span id="period">For the period {{ report.period.start|date_label }} to {{ report.period.end|date_label }}</span>
+        <span class="is-meta">{{ report.currency }}</span>
+      </div>
+      {% if report.hasActivity %}
+      <table class="is-table" aria-label="Income statement">
+        <colgroup><col><col class="is-amount-column"></colgroup>
+        <thead class="is-sr-only">
+          <tr><th scope="col">Account</th><th scope="col">Amount ({{ report.currency }})</th></tr>
+        </thead>
+        <tbody>
+        {% for row in report.rows %}
+          <tr class="is-row--{{ row.type }}">
+            {% if row.type == 'header' %}
+            <th colspan="2" class="is-meta">{{ row.label }}</th>
+            {% else %}
+            <th scope="row">{{ row.label }}</th>
+            <td class="is-amt"><span class="is-value">{{ row.amountCents|money }}{% if row.amountCents >= 0 %}<span class="is-sign-pad" aria-hidden="true">)</span>{% endif %}</span></td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div role="status" class="is-state">
+        <strong>No activity in this period</strong>
+        <p>No income or expense activity was posted in this date range. Choose another date range and apply again.</p>
+      </div>
+      {% endif %}
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>
