@@ -1,0 +1,110 @@
+/* Ported from the supplied design handoff; system fonts keep the app self-contained. */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #fff; color: #0a0a0c; }
+body { -webkit-font-smoothing: antialiased; }
+
+.is {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+  font: 15px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.is-header h1 {
+  margin: 0;
+  font: 400 40px/1.04 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
+.is-header p { margin: 6px 0 24px; font-size: 16px; color: #3a3832; }
+.is-meta {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6e6a60;
+}
+
+.is-form { padding: 20px 0; border-block: 1px solid #cfc9bb; }
+.is-fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.is-fields label { display: flex; flex-direction: column; gap: 6px; flex: 1 1 150px; min-width: 0; }
+.is-fields input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #cfc9bb;
+  border-radius: 2px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.is-fields input[aria-invalid="true"] { border-color: #a83232; }
+.is-fields input::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer; }
+.is-fields button {
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid #0a0a0c;
+  border-radius: 2px;
+  background: #0a0a0c;
+  color: #fff;
+  font: 500 14px system-ui, sans-serif;
+  cursor: pointer;
+}
+.is-fields button:hover { background: #3a3832; border-color: #3a3832; }
+.is :focus-visible { outline: 2px solid #0a0a0c; outline-offset: 3px; }
+.is-error { margin: 10px 0 0; font-size: 14px; color: #a83232; }
+
+.is-statement { padding-top: 24px; font-variant-numeric: tabular-nums; }
+.is-period {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #0a0a0c;
+  font-size: 14px;
+  color: #3a3832;
+}
+.is-state { display: flex; flex-direction: column; gap: 8px; padding: 40px 0; }
+.is-state strong { font-size: 16px; font-weight: 500; }
+.is-state p { margin: 0; font-size: 14px; color: #3a3832; }
+
+.is-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.is-amount-column { width: 38%; }
+.is-table th { text-align: left; font-weight: inherit; }
+.is-table th, .is-table td { vertical-align: baseline; }
+.is-row--header th { padding: 20px 0 6px; }
+.is-row--line > * { padding: 6px 0; color: #3a3832; }
+.is-row--line th { padding-left: 16px; padding-right: 16px; }
+.is-row--subtotal { font-weight: 500; }
+.is-row--subtotal > * { padding: 8px 0; border-top: 1px solid #cfc9bb; }
+.is-row--subtotal th { padding-left: 16px; padding-right: 16px; }
+.is-row--summary { font-weight: 600; }
+.is-row--summary > * {
+  padding: 12px 0;
+  border-top: 1px solid #0a0a0c;
+  border-bottom: 1px solid #cfc9bb;
+}
+.is-row--net { font-weight: 600; }
+.is-row--net > * { padding: 18px 0 12px; border-top: 1px solid #0a0a0c; font-size: 17px; }
+.is-row--net .is-value { display: inline-block; padding-bottom: 3px; border-bottom: 3px double #0a0a0c; }
+.is-amt { text-align: right; white-space: nowrap; }
+.is-sign-pad { visibility: hidden; } /* Align digits with parenthesized negative amounts. */
+.is-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .is { padding: 32px 16px 56px; font-size: 14px; }
+  .is-header h1 { font-size: 36px; }
+  .is-fields button { width: 100%; }
+  .is-row--line th, .is-row--subtotal th { padding-left: 10px; padding-right: 10px; }
+  .is-row--net > * { font-size: 16px; }
+}
