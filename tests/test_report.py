@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, localcontext
 
 import pytest
 
@@ -205,3 +205,68 @@ def test_decimal_strings_convert_to_integer_cents(amount, expected):
 def test_invalid_money_is_rejected_instead_of_rounded(amount):
     with pytest.raises(ValueError):
         to_cents(amount)
+
+
+def test_offsetting_postings_are_activity_even_when_every_balance_is_zero(ledger):
+    sale = deepcopy(ledger["journal_entries"][1])
+    reversal = deepcopy(sale)
+    reversal["id"] = "test-reversal"
+    for line in reversal["lines"]:
+        line["debit"], line["credit"] = line["credit"], line["debit"]
+    ledger["journal_entries"] = [sale, reversal]
+    report = report_for(ledger)
+    assert report["hasActivity"] is True
+    assert all(value == 0 for value in account_amounts(report).values())
+    assert all(value == 0 for value in report["totals"].values())
+
+
+def test_zero_only_lines_do_not_count_as_activity(ledger):
+    for entry in ledger["journal_entries"]:
+        for line in entry["lines"]:
+            line["debit"] = line["credit"] = "0.00"
+    assert report_for(ledger)["hasActivity"] is False
+
+
+def test_exact_conversion_is_independent_of_decimal_context():
+    with localcontext() as context:
+        context.prec = 4
+        assert to_cents("1234567890123456789012345678.90") == 123456789012345678901234567890
+        assert context.prec == 4
+        with pytest.raises(ValueError, match="whole cents"):
+            to_cents("1.0000000000000000000000000001")
+
+
+def test_unsupported_pnl_subtype_is_not_silently_dropped(ledger):
+    ledger["accounts"][6]["subtype"] = "unknown"
+    with pytest.raises(ValueError, match="Unsupported"):
+        report_for(ledger)
+
+
+def test_unknown_account_reference_fails_instead_of_omitting_activity(ledger):
+    ledger["journal_entries"][1]["lines"][1]["account"] = "9999"
+    with pytest.raises(KeyError):
+        report_for(ledger)
+
+
+def test_all_entry_date_ranges_match_independent_decimal_net_calculation(ledger):
+    # Net income also equals total credits minus total debits over ALL P&L accounts.
+    # This independent formulation avoids the engine's section/subtotal calculations.
+    pnl_accounts = {
+        account["number"] for account in ledger["accounts"]
+        if account["type"] in {"revenue", "expense"}
+    }
+    dates = sorted({entry["date"] for entry in ledger["journal_entries"]})
+    for start_index, start in enumerate(dates):
+        for end in dates[start_index:]:
+            expected_dollars = sum(
+                (
+                    Decimal(line["credit"]) - Decimal(line["debit"])
+                    for entry in ledger["journal_entries"]
+                    if entry["status"] == "posted" and start <= entry["date"] <= end
+                    for line in entry["lines"]
+                    if line["account"] in pnl_accounts
+                ),
+                Decimal("0"),
+            )
+            report = report_for(ledger, start, end)
+            assert report["totals"]["netIncomeCents"] == int(expected_dollars * 100), (start, end)
