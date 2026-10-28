@@ -7,10 +7,10 @@ The static ledger contains the assignment's 15 accounts and 25 journal entries; 
 ## Run on a Mac
 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/). If needed, install uv with `brew install uv`.
-The complete application is on `feat/income-statement-complete` while the stacked PRs are open.
+The complete application is on `main`.
 
 ```sh
-git clone --branch feat/income-statement-complete https://github.com/akim136/campfire-income-statement.git
+git clone https://github.com/akim136/campfire-income-statement.git
 cd campfire-income-statement
 uv sync --locked
 ```
@@ -136,8 +136,10 @@ The design's React runtime, mocked results, and float-dollar formatting are not 
 ## Review order and limits
 
 The meaningful checkpoints are scaffold → accounting → API → design → hardening → documentation.
-PRs are stacked in that order across `feat/income-statement`, `feat/income-statement-api`,
-`feat/income-statement-design`, and `feat/income-statement-complete`. They are left unmerged for review.
+The original four PRs document those slices. A follow-up integration PR brings the complete
+application onto `main` after the stacked PRs were merged into their parent feature branches.
+GitHub Actions runs the locked test suite on PRs targeting `main` and on pushes to `main`.
+The workflow uses read-only permissions and GitHub-owned actions pinned to commit SHAs.
 
 The scope is a static, trusted, single-company USD ledger with numeric account numbers and
 the assignment's account subtypes. Fractional-cent, negative, and nonfinite debit/credit inputs
