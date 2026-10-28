@@ -30,7 +30,7 @@ Versions tested on macOS:
 
 | Tool/dependency | Version |
 | --- | --- |
-| Python | 3.11.12 |
+| Python | 3.12.9 (also tested on 3.11.12) |
 | uv | 0.9.11 |
 | FastAPI | 0.162.0 |
 | Jinja2 | 3.1.6 |
@@ -38,7 +38,8 @@ Versions tested on macOS:
 | Pytest | 9.1.1 |
 | HTTPX (TestClient) | 0.28.1 |
 
-`.python-version` selects Python 3.11. `pyproject.toml` declares the dependencies;
+`.python-version` selects Python 3.12 to match Vercel's supported runtime; CI reads the same file.
+`pyproject.toml` declares the dependencies;
 `uv.lock` pins the complete resolved set. Use `--locked` to prevent accidental dependency updates.
 
 ## API
